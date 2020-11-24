@@ -17,10 +17,12 @@ class MirrorController
     void setOffset(double offsetDegrees);
     void setAmplitude(double amplitudeDegrees);
     void setStepsPerRevolution(int stepsPerRevolution);
+    void setPhase(int phaseDegrees);
 
     int     getSpeed();
     double  getAmplitude();
     double  getOffset();
+    int     getPhase();
 
     void runMovement();
     void stopMovement();
@@ -32,6 +34,7 @@ class MirrorController
 
     bool        _makeOneStep();
     void        _setDirection(bool direction);
+    void        _initPhase();
 
     int         _currentStep;
     bool        _direction;
@@ -40,10 +43,16 @@ class MirrorController
     int         _pinMF;
 
     int         _stepsPerRevolution;
-    int         _offset;
-    int         _amplitude;
+    double      _offset;
+    int         _offsetSteps;
+    double      _amplitude;
+    int         _amplitudeSteps;
+    int         _phase;
+    int         _phaseSteps;
+    int         _speedRpm; 
 
     uint32_t    _stepInterval;
+    uint32_t    _phaseTime;
     uint32_t    _lastStep;
 
 };
