@@ -17,7 +17,8 @@ void MirrorController::init()
     pinMode(_pinDir, OUTPUT);
     pinMode(_pinPU, OUTPUT);
     pinMode(_pinMF, OUTPUT);
-    digitalWrite(_pinMF, HIGH); // activate driver
+    digitalWrite(_pinMF, HIGH); // disable driver
+    _motorDisabled = true;
 }
 
 void MirrorController::setSpeed(int speedRPM)
@@ -60,6 +61,7 @@ void MirrorController::setPhase(int phaseDegrees)
             _phase = phaseDegrees%360;
             _phaseSteps = (long)_phase * _amplitudeSteps / 180;
             _phaseTime = _phaseSteps * _stepInterval;
+            //Serial.println(_phaseTime);
         }
     }
 }
@@ -91,9 +93,14 @@ void MirrorController::setStepsPerRevolution(int stepsPerRevolution)
 
 void MirrorController::runMovement()
 {
+    if(_motorDisabled)
+    {
+        digitalWrite(_pinMF, LOW); // activate driver
+        _motorDisabled = false;
+    }
+
     if(_lastStep == 0)
     {
-        Serial.println(String(micros()) + "\tStart");
         _lastStep = micros();
     }
 
@@ -123,8 +130,20 @@ void MirrorController::runMovement()
     }
 }
 
-void MirrorController::stopMovement()
+void MirrorController::activateMotors()
 {
+    digitalWrite(_pinMF, LOW); // activate driver
+    _motorDisabled = false;
+}
+
+void MirrorController::deactivateMotors()
+{
+    digitalWrite(_pinMF, HIGH); // activate driver
+    _motorDisabled = true;
+}
+
+void MirrorController::stopMovement()
+{   
     int incr = 0;
     if(_currentStep <= _offsetSteps)
     {
@@ -149,6 +168,12 @@ void MirrorController::stopMovement()
     _direction = true; //clockwise
     _currentStep = 0;
     _lastStep = 0;
+
+    if(!_motorDisabled)
+    {
+        digitalWrite(_pinMF, HIGH); // activate driver
+        _motorDisabled = true;
+    }
 }
 
 void MirrorController::runStepsBlocking(int numberOfSteps, bool direction)
@@ -168,6 +193,7 @@ bool    MirrorController::_makeOneStep()
 {
     if(micros() - _lastStep > _stepInterval + _phaseTime)
     {
+        Serial.println(micros() - _lastStep);
         digitalWrite(_pinPU, LOW);
         _lastStep = micros() - _phaseTime;
         delayMicroseconds(10);
@@ -182,13 +208,4 @@ void    MirrorController::_setDirection(bool direction)
 {
     digitalWrite(_pinDir, direction);
     _direction = direction;
-}
-
-void MirrorController::_initPhase()
-{
-    if(_phase < 90 || _phase >= 270)
-    {
-        _direction = true;
-
-    }
 }

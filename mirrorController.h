@@ -99,6 +99,16 @@ class MirrorController
     */
     void stopMovement();
 
+    /**
+     * activateMotors : activates the motors by enabling the MF/ENABLE pin
+    */
+    void activateMotors();
+
+    /**
+     * deactivateMotors : deactivate the motors by disabling the MF/ENABLE pin
+    */
+    void deactivateMotors();
+
 
     /**
      * runStepsBlocking : blocking function just to test the stepper motor. This function just rotates the axle by a desired amount of steps.
@@ -112,10 +122,10 @@ class MirrorController
 
     bool        _makeOneStep();
     void        _setDirection(bool direction);
-    void        _initPhase();
 
     int         _currentStep;
     bool        _direction;
+    bool        _motorDisabled;
     int         _pinDir;
     int         _pinPU;
     int         _pinMF;
